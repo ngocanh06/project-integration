@@ -7,78 +7,104 @@ function Dashboard() {
   const [timeFilter, setTimeFilter] = useState("This Month");
   const [departmentFilter, setDepartmentFilter] = useState("All Departments");
   const [positionFilter, setPositionFilter] = useState("All Positions");
+  const [metric, setMetric] = useState("EmployeeCount");
+  const [searchText, setSearchText] = useState("");
+
+  const loadDashboard = async () => {
+    try {
+      const result = await getDashboardData();
+      setData(result);
+    } catch (error) {
+      console.error("Dashboard API error:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        const result = await getDashboardData();
-        setData(result);
-      } catch (error) {
-        console.error("Dashboard API error:", error);
-      }
-    };
-
-    fetchDashboard();
+    loadDashboard();
   }, []);
 
   const summary = data?.summary || {};
-  const departments = data?.departmentChart || [];
-  const employees = data?.employees || [];
+  const departments = data?.departmentOverview || [];
   const positions = data?.positions || [];
+  const employees = data?.employees || [];
   const activities = data?.recentActivities || [];
 
-  const filteredDepartments = useMemo(() => {
-    let filteredEmployees = employees;
+  const filteredEmployees = useMemo(() => {
+    let list = employees;
 
     if (departmentFilter !== "All Departments") {
-      const selectedDepartment = departments.find(
-        (department) => department.DepartmentName === departmentFilter
-      );
-
-      if (selectedDepartment) {
-        filteredEmployees = filteredEmployees.filter(
-          (employee) => employee.DepartmentID === selectedDepartment.DepartmentID
-        );
-      }
+      list = list.filter((e) => e.DepartmentName === departmentFilter);
     }
 
     if (positionFilter !== "All Positions") {
-      const selectedPosition = positions.find(
-        (position) => position.PositionName === positionFilter
-      );
-
-      if (selectedPosition) {
-        filteredEmployees = filteredEmployees.filter(
-          (employee) => employee.PositionID === selectedPosition.PositionID
-        );
-      }
+      list = list.filter((e) => e.PositionName === positionFilter);
     }
 
+    if (searchText.trim()) {
+      const keyword = searchText.toLowerCase();
+
+      list = list.filter(
+        (e) =>
+          e.FullName.toLowerCase().includes(keyword) ||
+          e.DepartmentName.toLowerCase().includes(keyword) ||
+          e.PositionName.toLowerCase().includes(keyword)
+      );
+    }
+
+    return list;
+  }, [employees, departmentFilter, positionFilter, searchText]);
+
+  const filteredDepartments = useMemo(() => {
     return departments
       .filter((department) => {
-        if (departmentFilter === "All Departments") {
-          return true;
-        }
-
+        if (departmentFilter === "All Departments") return true;
         return department.DepartmentName === departmentFilter;
       })
       .map((department) => {
-        const total = filteredEmployees.filter(
-          (employee) => employee.DepartmentID === department.DepartmentID
-        ).length;
+        const deptEmployees = filteredEmployees.filter(
+          (e) => e.DepartmentID === department.DepartmentID
+        );
 
         return {
           ...department,
-          total,
+          EmployeeCount: deptEmployees.length,
+          TotalSalary: deptEmployees.reduce((sum, e) => sum + Number(e.NetSalary || 0), 0),
+          TotalBonus: deptEmployees.reduce((sum, e) => sum + Number(e.Bonus || 0), 0),
+          TotalDividend: deptEmployees.reduce((sum, e) => sum + Number(e.DividendAmount || 0), 0)
         };
       });
-  }, [employees, departments, positions, departmentFilter, positionFilter]);
+  }, [departments, filteredEmployees, departmentFilter]);
 
   if (!data) {
     return <div className="loading">Loading dashboard...</div>;
   }
 
-  const maxScale = 5;
+  const getMetricValue = (item) => Number(item[metric] || 0);
+  const maxValue = Math.max(...filteredDepartments.map(getMetricValue), 1);
+
+  const formatMoney = (value) => `$${Number(value || 0).toLocaleString()}`;
+
+  const exportCSV = () => {
+    const rows = [
+      ["Department", "Employees", "Salary", "Bonus", "Dividend"],
+      ...filteredDepartments.map((item) => [
+        item.DepartmentName,
+        item.EmployeeCount,
+        item.TotalSalary,
+        item.TotalBonus,
+        item.TotalDividend
+      ])
+    ];
+
+    const csvContent = rows.map((row) => row.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "dashboard_department_report.csv";
+    link.click();
+  };
 
   return (
     <div className="dashboard-page">
@@ -89,43 +115,18 @@ function Dashboard() {
         </div>
 
         <nav className="menu">
-          <a className="active" href="#">
-            <span>⌂</span> Dashboard
-          </a>
-
-          <a href="#">
-            <span>▦</span> Department <b>›</b>
-          </a>
-
-          <a href="#">
-            <span>♙</span> Employee
-          </a>
-
-          <a href="#">
-            <span>◷</span> Attendance
-          </a>
-
-          <a href="#">
-            <span>$</span> Salary
-          </a>
-
-          <a href="#">
-            <span>▤</span> Report <em>14</em>
-          </a>
+          <a className="active" href="#"><span>⌂</span>Dashboard</a>
+          <a href="#"><span>▦</span>Department <b>›</b></a>
+          <a href="#"><span>♙</span>Employee</a>
+          <a href="#"><span>◷</span>Attendance</a>
+          <a href="#"><span>$</span>Salary</a>
+          <a href="#"><span>▤</span>Report <em>14</em></a>
 
           <p>Others</p>
 
-          <a href="#">
-            <span>?</span> Guide <b>›</b>
-          </a>
-
-          <a href="#">
-            <span>✉</span> Messenger <i>New!</i>
-          </a>
-
-          <a href="#">
-            <span>⚙</span> Settings
-          </a>
+          <a href="#"><span>?</span>Guide <b>›</b></a>
+          <a href="#"><span>✉</span>Messenger <i>New!</i></a>
+          <a href="#"><span>⚙</span>Settings</a>
         </nav>
       </aside>
 
@@ -133,37 +134,31 @@ function Dashboard() {
         <header className="topbar">
           <div className="title-box">
             <span className="hamburger">☰</span>
-
             <div>
               <h1>Dashboard</h1>
-              <p>HR and Payroll Integration Overview</p>
+              <p>HR, payroll, attendance, and dividend integration overview</p>
             </div>
           </div>
 
           <div className="top-right">
             <div className="search-box">
-              <input placeholder="Search here..." />
+              <input
+                placeholder="Search employee, department..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
               <span>⌕</span>
             </div>
 
-            <div className="notify">
-              🔔<b className="blue-dot">23</b>
-            </div>
-
-            <div className="notify">
-              ↻<b className="green-dot">68</b>
-            </div>
-
-            <div className="notify">
-              ◔<b className="gray-dot">14</b>
-            </div>
+            <button className="refresh-btn" onClick={loadDashboard}>
+              Refresh
+            </button>
 
             <div className="profile">
               <div>
                 <strong>Designluch</strong>
                 <small>Super Admin</small>
               </div>
-
               <div className="avatar">🙂</div>
             </div>
           </div>
@@ -173,39 +168,59 @@ function Dashboard() {
           <div className="small-card">
             <p>Total Employees</p>
             <h2>{summary.totalEmployees || 0}</h2>
-            <span>+12%</span>
+            <span>HUMAN_2025</span>
           </div>
 
           <div className="small-card">
             <p>Active Employees</p>
             <h2>{summary.activeEmployees || 0}</h2>
-            <span>+8%</span>
+            <span>SQL Server</span>
           </div>
 
           <div className="small-card">
-            <p>Employees on Leave</p>
+            <p>On Leave</p>
             <h2>{summary.leaveEmployees || 0}</h2>
-            <span>+3%</span>
+            <span>Attendance</span>
           </div>
 
           <div className="income-card">
             <div className="income-blue">
-              <div className="circle">+5%</div>
-
               <div>
                 <p>Total Dividend</p>
-                <h2>${Number(summary.totalDividend || 0).toLocaleString()}</h2>
+                <h2>{formatMoney(summary.totalDividend)}</h2>
               </div>
+              <div className="circle">+5%</div>
             </div>
 
             <div className="income-green">
               <div>
                 <p>Total Payroll</p>
-                <h2>${Number(summary.totalRevenue || 0).toLocaleString()}</h2>
+                <h2>{formatMoney(summary.totalRevenue)}</h2>
               </div>
-
-              <div className="circle">+5%</div>
+              <div className="circle">+9%</div>
             </div>
+          </div>
+        </section>
+
+        <section className="kpi-grid">
+          <div className="kpi-card">
+            <p>Total Bonus</p>
+            <h3>{formatMoney(summary.totalBonus)}</h3>
+          </div>
+
+          <div className="kpi-card">
+            <p>Total Deductions</p>
+            <h3>{formatMoney(summary.totalDeductions)}</h3>
+          </div>
+
+          <div className="kpi-card">
+            <p>Work Days</p>
+            <h3>{summary.totalWorkDays || 0}</h3>
+          </div>
+
+          <div className="kpi-card">
+            <p>Absent Days</p>
+            <h3>{summary.totalAbsentDays || 0}</h3>
           </div>
         </section>
 
@@ -213,82 +228,69 @@ function Dashboard() {
           <div className="panel chart-panel">
             <div className="chart-header">
               <div>
-                <h3>Employees by Department</h3>
-                <p>Based on HUMAN_2025 employee, department, and position data</p>
+                <h3>Department Integration Overview</h3>
+                <p>Combined from employees, positions, salary, attendance, and dividends</p>
               </div>
 
               <div className="chart-filters">
-                <select
-                  value={timeFilter}
-                  onChange={(event) => setTimeFilter(event.target.value)}
-                >
+                <select value={timeFilter} onChange={(e) => setTimeFilter(e.target.value)}>
                   <option>This Month</option>
                   <option>Last Month</option>
                   <option>This Quarter</option>
                   <option>2026</option>
                 </select>
 
-                <select
-                  value={departmentFilter}
-                  onChange={(event) => setDepartmentFilter(event.target.value)}
-                >
+                <select value={departmentFilter} onChange={(e) => setDepartmentFilter(e.target.value)}>
                   <option>All Departments</option>
-                  {departments.map((department) => (
-                    <option
-                      key={department.DepartmentID}
-                      value={department.DepartmentName}
-                    >
-                      {department.DepartmentName}
-                    </option>
+                  {departments.map((d) => (
+                    <option key={d.DepartmentID}>{d.DepartmentName}</option>
                   ))}
                 </select>
 
-                <select
-                  value={positionFilter}
-                  onChange={(event) => setPositionFilter(event.target.value)}
-                >
+                <select value={positionFilter} onChange={(e) => setPositionFilter(e.target.value)}>
                   <option>All Positions</option>
-                  {positions.map((position) => (
-                    <option
-                      key={position.PositionID}
-                      value={position.PositionName}
-                    >
-                      {position.PositionName}
-                    </option>
+                  {positions.map((p) => (
+                    <option key={p.PositionID}>{p.PositionName}</option>
                   ))}
+                </select>
+
+                <select value={metric} onChange={(e) => setMetric(e.target.value)}>
+                  <option value="EmployeeCount">Employees</option>
+                  <option value="TotalSalary">Salary</option>
+                  <option value="TotalBonus">Bonus</option>
+                  <option value="TotalDividend">Dividend</option>
                 </select>
               </div>
             </div>
 
-            <div className="department-chart">
-              <div className="chart-grid">
-                {[5, 4, 3, 2, 1].map((line) => (
-                  <div className="grid-line" key={line}>
-                    <span>{line}</span>
-                  </div>
-                ))}
-              </div>
+            <div className="department-card-grid">
+              {filteredDepartments.map((item) => {
+                const value = getMetricValue(item);
+                const percent = Math.max((value / maxValue) * 100, 8);
 
-              <div className="bars-container">
-                {filteredDepartments.map((department) => {
-                  const value = department.total || 0;
-                  const height = Math.max((value / maxScale) * 250, 40);
-
-                  return (
-                    <div className="bar-item" key={department.DepartmentID}>
-                      <div className="bar" style={{ height: `${height}px` }}>
-                        <span className="bar-value">{value}</span>
-                      </div>
-
-                      <p>{department.DepartmentName}</p>
+                return (
+                  <div className="department-card" key={item.DepartmentID}>
+                    <div className="dept-top">
+                      <h4>{item.DepartmentName}</h4>
+                      <span>{item.EmployeeCount} NV</span>
                     </div>
-                  );
-                })}
-              </div>
+
+                    <div className="dept-bar">
+                      <div style={{ width: `${percent}%` }}></div>
+                    </div>
+
+                    <div className="dept-info">
+                      <p>Salary: <b>{formatMoney(item.TotalSalary)}</b></p>
+                      <p>Bonus: <b>{formatMoney(item.TotalBonus)}</b></p>
+                      <p>Dividend: <b>{formatMoney(item.TotalDividend)}</b></p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             <div className="filter-note">
-              Filter: {timeFilter} / {departmentFilter} / {positionFilter}
+              Filter: {timeFilter} / {departmentFilter} / {positionFilter} / {metric}
             </div>
           </div>
 
@@ -307,62 +309,48 @@ function Dashboard() {
         </section>
 
         <section className="bottom">
-          <div className="panel dividend-panel">
+          <div className="panel table-panel">
             <div className="panel-header">
-              <h3>Dividend Summary</h3>
-
-              <div className="tabs">
-                <b>Monthly</b>
-                <span>Weekly</span>
-                <span>Daily</span>
-              </div>
+              <h3>Employee Integration List</h3>
+              <button onClick={exportCSV}>Download CSV</button>
             </div>
 
-            <div className="dividend-card">
-              <div>
-                <label>#HUMAN_2025</label>
-                <h2>${Number(summary.totalDividend || 0).toLocaleString()}</h2>
-                <p>Total dividend amount loaded from SQL Server database.</p>
-              </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Department</th>
+                  <th>Position</th>
+                  <th>Status</th>
+                  <th>Salary</th>
+                </tr>
+              </thead>
 
-              <div className="donut">
-                <div>
-                  <strong>+5%</strong>
-                  <small>Q2 2026</small>
-                </div>
-              </div>
-            </div>
-
-            <div className="dividend-card second">
-              <div>
-                <label>#PAYROLL_2026</label>
-                <h2>${Number(summary.totalRevenue || 0).toLocaleString()}</h2>
-                <p>Payroll revenue synchronized from MySQL database.</p>
-              </div>
-
-              <div className="mini-wave">
-                <svg viewBox="0 0 120 50">
-                  <path d="M5 35 C20 5, 30 40, 45 20 S70 10, 80 28 S100 40, 115 12" />
-                </svg>
-              </div>
-            </div>
+              <tbody>
+                {filteredEmployees.map((employee) => (
+                  <tr key={employee.EmployeeID}>
+                    <td>{employee.FullName}</td>
+                    <td>{employee.DepartmentName}</td>
+                    <td>{employee.PositionName}</td>
+                    <td>
+                      <span className="status-pill">{employee.Status}</span>
+                    </td>
+                    <td>{formatMoney(employee.NetSalary)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
           <div className="panel trend-panel">
             <div className="trend-header">
-              <div className="tabs">
-                <b>Monthly</b>
-                <span>Weekly</span>
-                <span>Daily</span>
-              </div>
-
-              <button>Download CSV</button>
+              <h3>Payroll Trend</h3>
+              <button onClick={exportCSV}>Download CSV</button>
             </div>
 
             <div className="trend-title">
-              <h2>${Number(summary.totalRevenue || 0).toLocaleString()}</h2>
-              <span className="triangle"></span>
-              <p>+9% from last month</p>
+              <h2>{formatMoney(summary.totalRevenue)}</h2>
+              <p>Payroll synchronized from MySQL payroll_2026</p>
             </div>
 
             <div className="area-chart">
@@ -372,16 +360,6 @@ function Dashboard() {
                   fill="#0d86ff"
                 />
               </svg>
-            </div>
-
-            <div className="months">
-              <span>Aug</span>
-              <span>Sep</span>
-              <span>Oct</span>
-              <span>Nov</span>
-              <span>Dec</span>
-              <b>Jan</b>
-              <span>Feb</span>
             </div>
           </div>
         </section>

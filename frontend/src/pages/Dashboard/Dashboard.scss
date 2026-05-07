@@ -689,3 +689,141 @@
     flex-wrap: wrap;
   }
 }
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.kpi-card {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+
+  p {
+    margin: 0 0 8px;
+    color: #64748b;
+    font-size: 13px;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 22px;
+  }
+}
+
+.refresh-btn {
+  border: none;
+  background: #0d86ff;
+  color: white;
+  padding: 11px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.department-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  margin-top: 26px;
+}
+
+.department-card {
+  padding: 18px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f8fbff, #ffffff);
+  border: 1px solid #edf2f7;
+}
+
+.dept-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h4 {
+    margin: 0;
+    font-size: 15px;
+  }
+
+  span {
+    background: #eaf4ff;
+    color: #0d86ff;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+}
+
+.dept-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: #edf2f7;
+  margin: 14px 0;
+  overflow: hidden;
+
+  div {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #0d86ff, #54c6ff);
+  }
+}
+
+.dept-info {
+  display: grid;
+  gap: 6px;
+
+  p {
+    display: flex;
+    justify-content: space-between;
+    margin: 0;
+    color: #64748b;
+    font-size: 13px;
+  }
+
+  b {
+    color: #111827;
+  }
+}
+
+.table-panel {
+  overflow-x: auto;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 18px;
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 14px;
+    border-bottom: 1px solid #edf2f7;
+    font-size: 13px;
+  }
+
+  th {
+    color: #64748b;
+    font-weight: 800;
+  }
+}
+
+.status-pill {
+  background: #eaf4ff;
+  color: #0d86ff;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+@media (max-width: 1100px) {
+  .kpi-grid,
+  .department-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
