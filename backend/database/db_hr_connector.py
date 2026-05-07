@@ -6,8 +6,7 @@ def get_hr_connection():
         "DRIVER={ODBC Driver 17 for SQL Server};"
         f"SERVER={Config.SQL_SERVER};"
         f"DATABASE={Config.SQL_DATABASE};"
-        f"UID={Config.SQL_USER};"
-        f"PWD={Config.SQL_PASSWORD};"
+        "Trusted_Connection=yes;"
         "TrustServerCertificate=yes;"
     )
 
