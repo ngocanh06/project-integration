@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useAuth';
+import PrivateRoute from './components/PrivateRoute';
+import PublicRoute from './components/PublicRoute';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
@@ -8,7 +10,14 @@ import ResetPassword from './pages/auth/ResetPassword';
 import ChangePassword from './pages/auth/ChangePassword';
 import Profile from './pages/auth/Profile';
 import Success from './pages/auth/Success';
+// Admin Pages
+import UserList from './pages/admin/UserList';
+import UserAdd from './pages/admin/UserAdd';
+import UserEdit from './pages/admin/UserEdit';
+import RoleList from './pages/admin/RoleList';
+import PermissionList from './pages/admin/PermissionList';
 import './App.css';
+import './styles/auth.css';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -22,7 +31,7 @@ const ProtectedRoute = ({ children }) => {
 };
 
 // Public Route Component (redirect if already authenticated)
-const PublicRoute = ({ children }) => {
+const PublicRouteComponent = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
@@ -32,6 +41,25 @@ const PublicRoute = ({ children }) => {
   return !isAuthenticated ? children : <Navigate to="/dashboard" replace />;
 };
 
+// Admin Route Component
+const AdminRoute = ({ children }) => {
+  const { isAuthenticated, loading, user } = useAuth();
+
+  if (loading) {
+    return <div className="loading-page">Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user?.system_role !== 'admin') {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+};
+
 function AppContent() {
   return (
     <Routes>
@@ -39,39 +67,39 @@ function AppContent() {
       <Route
         path="/login"
         element={
-          <PublicRoute>
+          <PublicRouteComponent>
             <Login />
-          </PublicRoute>
+          </PublicRouteComponent>
         }
       />
       <Route
         path="/register"
         element={
-          <PublicRoute>
+          <PublicRouteComponent>
             <Register />
-          </PublicRoute>
+          </PublicRouteComponent>
         }
       />
       <Route
         path="/forgot-password"
         element={
-          <PublicRoute>
+          <PublicRouteComponent>
             <ForgotPassword />
-          </PublicRoute>
+          </PublicRouteComponent>
         }
       />
       <Route
         path="/reset-password"
         element={
-          <PublicRoute>
+          <PublicRouteComponent>
             <ResetPassword />
-          </PublicRoute>
+          </PublicRouteComponent>
         }
       />
       <Route
         path="/account-created"
         element={
-          <PublicRoute>
+          <PublicRouteComponent>
             <Success
               title="ACCOUNT CREATED"
               message="Your account has been successfully created. An admin will review your request and send you further instructions via email."
@@ -81,13 +109,13 @@ function AppContent() {
               secondaryText="Return to Home"
               secondaryPath="/"
             />
-          </PublicRoute>
+          </PublicRouteComponent>
         }
       />
       <Route
         path="/password-reset-success"
         element={
-          <PublicRoute>
+          <PublicRouteComponent>
             <Success
               title="Password Reset Successful"
               message="Your password has been successfully reset. You can now log in with your new password."
@@ -95,7 +123,7 @@ function AppContent() {
               nextPath="/login"
               showSecondaryAction={false}
             />
-          </PublicRoute>
+          </PublicRouteComponent>
         }
       />
 
@@ -117,9 +145,52 @@ function AppContent() {
         }
       />
 
+      {/* Admin Routes */}
+      <Route
+        path="/admin/users"
+        element={
+          <AdminRoute>
+            <UserList />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/users/add"
+        element={
+          <AdminRoute>
+            <UserAdd />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/users/:userId/edit"
+        element={
+          <AdminRoute>
+            <UserEdit />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/roles"
+        element={
+          <AdminRoute>
+            <RoleList />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/permissions"
+        element={
+          <AdminRoute>
+            <PermissionList />
+          </AdminRoute>
+        }
+      />
+
       {/* Default Routes */}
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/dashboard" element={<Navigate to="/profile" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

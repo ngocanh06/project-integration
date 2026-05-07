@@ -41,6 +41,7 @@ def create_tables() -> None:
     """Tạo tất cả bảng khi khởi động server"""
     from models.user_model import User      # noqa: F401
     from models.otp_model import OtpCode   # noqa: F401
+    from models.role_model import Role, Permission  # noqa: F401
     Base.metadata.create_all(bind=engine)
 
 

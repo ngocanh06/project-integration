@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from database import create_tables, check_connection
 from modules.auth.routes.auth_routes import router as auth_router
+from modules.auth.routes.user_routes import router as user_router
+from modules.auth.routes.role_routes import router as role_router, permissions_router
 from modules.otp.routes.otp_routes import router as otp_router
 
 app = FastAPI(
@@ -18,6 +20,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ── Include Routers ────────────────────────────────────────────────────────
+app.include_router(auth_router)
+app.include_router(user_router)
+app.include_router(role_router)
+app.include_router(permissions_router)
+app.include_router(otp_router)
 
 
 @app.on_event("startup")

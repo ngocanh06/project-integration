@@ -1,5 +1,7 @@
+"""Permission checker utility for authorization"""
 from typing import List, Optional
 from enum import Enum
+from sqlalchemy.orm import Session
 
 
 class SystemRole(str, Enum):
@@ -29,10 +31,12 @@ def get_user_permissions(user_role: str) -> List[str]:
     permissions = {
         SystemRole.ADMIN: [
             "view_users", "create_user", "edit_user", "delete_user",
-            "manage_roles", "view_audit_log", "manage_system"
+            "manage_roles", "view_audit_log", "manage_system",
+            "user:manage", "role:manage", "permission:manage", "report:view"
         ],
         SystemRole.MANAGER: [
-            "view_users", "create_user", "edit_user", "view_audit_log"
+            "view_users", "create_user", "edit_user", "view_audit_log",
+            "report:view", "attendance:manage"
         ],
         SystemRole.USER: [
             "view_profile", "edit_profile", "change_password"
@@ -47,3 +51,53 @@ def has_permission(user_role: str, permission: str) -> bool:
     """Check if user has specific permission"""
     permissions = get_user_permissions(user_role)
     return permission in permissions
+
+
+class PermissionChecker:
+    """Check user permissions and authorize actions"""
+
+    @staticmethod
+    def has_permission(user_id: str, permission_name: str, db: Session) -> bool:
+        """Check if user has specific permission"""
+        from database.db_auth_connector import AuthDatabaseConnector
+        return AuthDatabaseConnector.user_has_permission(user_id, permission_name, db)
+
+    @staticmethod
+    def has_any_permission(user_id: str, permissions: List[str], db: Session) -> bool:
+        """Check if user has any of the specified permissions"""
+        for permission in permissions:
+            if PermissionChecker.has_permission(user_id, permission, db):
+                return True
+        return False
+
+    @staticmethod
+    def has_all_permissions(user_id: str, permissions: List[str], db: Session) -> bool:
+        """Check if user has all specified permissions"""
+        for permission in permissions:
+            if not PermissionChecker.has_permission(user_id, permission, db):
+                return False
+        return True
+
+    @staticmethod
+    def can_manage_users(user_id: str, db: Session) -> bool:
+        """Check if user can manage other users"""
+        return PermissionChecker.has_permission(user_id, "user:manage", db)
+
+    @staticmethod
+    def can_manage_roles(user_id: str, db: Session) -> bool:
+        """Check if user can manage roles"""
+        return PermissionChecker.has_permission(user_id, "role:manage", db)
+
+    @staticmethod
+    def is_admin(user_id: str, db: Session) -> bool:
+        """Check if user is admin"""
+        from database.db_auth_connector import AuthDatabaseConnector
+        user = AuthDatabaseConnector.get_user_by_id(user_id, db)
+        return user and user.system_role == "admin"
+
+    @staticmethod
+    def is_active(user_id: str, db: Session) -> bool:
+        """Check if user is active"""
+        from database.db_auth_connector import AuthDatabaseConnector
+        user = AuthDatabaseConnector.get_user_by_id(user_id, db)
+        return user and user.is_active
