@@ -4,33 +4,36 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-export const humanPool = new sql.ConnectionPool({
-  user: process.env.HUMAN_DB_USER,
-  password: process.env.HUMAN_DB_PASSWORD,
-  server: process.env.HUMAN_DB_SERVER,
-  database: process.env.HUMAN_DB_NAME,
+const sqlConfig = {
+  user: process.env.SQL_USER,
+  password: process.env.SQL_PASSWORD,
+  server: process.env.SQL_SERVER,
+  database: process.env.SQL_DATABASE,
   options: {
     encrypt: false,
     trustServerCertificate: true,
   },
-});
+};
 
-export const payrollPool = mysql.createPool({
-  host: process.env.PAYROLL_DB_HOST,
-  user: process.env.PAYROLL_DB_USER,
-  password: process.env.PAYROLL_DB_PASSWORD,
-  database: process.env.PAYROLL_DB_NAME,
-});
+export let humanPool;
+
+export let payrollPool;
 
 export const connectDB = async () => {
   try {
-    await humanPool.connect();
+    humanPool = await sql.connect(sqlConfig);
+
     console.log("SQL Server HUMAN_2025 connected");
 
-    const conn = await payrollPool.getConnection();
+    payrollPool = await mysql.createPool({
+      host: process.env.MYSQL_HOST,
+      user: process.env.MYSQL_USER,
+      password: process.env.MYSQL_PASSWORD,
+      database: process.env.MYSQL_DATABASE,
+    });
+
     console.log("MySQL payroll_2026 connected");
-    conn.release();
   } catch (error) {
-    console.error("Database connection failed:", error.message);
+    console.log("Database connection failed:", error.message);
   }
 };

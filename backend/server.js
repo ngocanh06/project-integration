@@ -3,12 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 import { connectDB } from "./config/db.js";
-
-import employeeRoutes from "./routes/employeeRoutes.js";
-import departmentRoutes from "./routes/departmentRoutes.js";
-import attendanceRoutes from "./routes/attendanceRoutes.js";
-import payrollRoutes from "./routes/payrollRoutes.js";
-import integrationRoutes from "./routes/integrationRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
 
 dotenv.config();
 
@@ -19,14 +14,10 @@ app.use(express.json());
 
 connectDB();
 
-app.use("/api/employees", employeeRoutes);
-app.use("/api/departments", departmentRoutes);
-app.use("/api/attendance", attendanceRoutes);
-app.use("/api/payrolls", payrollRoutes);
-app.use("/api/dashboard", integrationRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 app.get("/", (req, res) => {
-  res.send("Backend is running with SQL Server + MySQL");
+  res.send("Dashboard backend is running");
 });
 
 const PORT = process.env.PORT || 5000;
