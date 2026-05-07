@@ -7,7 +7,7 @@ def get_dashboard_data():
     hr_cursor = hr_conn.cursor()
 
     hr_cursor.execute("""
-        SELECT EmployeeID, FullName, DepartmentID, Status
+        SELECT EmployeeID, FullName, DepartmentID, PositionID, Status
         FROM Employees
     """)
     employees = hr_cursor.fetchall()
@@ -17,6 +17,12 @@ def get_dashboard_data():
         FROM Departments
     """)
     departments = hr_cursor.fetchall()
+
+    hr_cursor.execute("""
+        SELECT PositionID, PositionName
+        FROM Positions
+    """)
+    positions = hr_cursor.fetchall()
 
     hr_cursor.execute("""
         SELECT DividendAmount
@@ -66,6 +72,25 @@ def get_dashboard_data():
             "total": count
         })
 
+    position_list = [
+        {
+            "PositionID": p.PositionID,
+            "PositionName": p.PositionName
+        }
+        for p in positions
+    ]
+
+    employee_list = [
+        {
+            "EmployeeID": e.EmployeeID,
+            "FullName": e.FullName,
+            "DepartmentID": e.DepartmentID,
+            "PositionID": e.PositionID,
+            "Status": e.Status
+        }
+        for e in employees
+    ]
+
     hr_cursor.close()
     hr_conn.close()
 
@@ -82,6 +107,8 @@ def get_dashboard_data():
             "totalBonus": float(payroll_summary["totalBonus"] or 0)
         },
         "departmentChart": department_chart,
+        "positions": position_list,
+        "employees": employee_list,
         "recentActivities": [
             "Connected to HUMAN_2025 database",
             "Connected to payroll_2026 database",

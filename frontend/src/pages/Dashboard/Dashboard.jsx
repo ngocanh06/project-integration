@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getDashboardData } from "../../api/dashboardApi";
 import "./Dashboard.scss";
 
 function Dashboard() {
   const [data, setData] = useState(null);
+  const [timeFilter, setTimeFilter] = useState("This Month");
+  const [departmentFilter, setDepartmentFilter] = useState("All Departments");
+  const [positionFilter, setPositionFilter] = useState("All Positions");
 
   useEffect(() => {
     const fetchDashboard = async () => {
@@ -18,15 +21,64 @@ function Dashboard() {
     fetchDashboard();
   }, []);
 
+  const summary = data?.summary || {};
+  const departments = data?.departmentChart || [];
+  const employees = data?.employees || [];
+  const positions = data?.positions || [];
+  const activities = data?.recentActivities || [];
+
+  const filteredDepartments = useMemo(() => {
+    let filteredEmployees = employees;
+
+    if (departmentFilter !== "All Departments") {
+      const selectedDepartment = departments.find(
+        (department) => department.DepartmentName === departmentFilter
+      );
+
+      if (selectedDepartment) {
+        filteredEmployees = filteredEmployees.filter(
+          (employee) => employee.DepartmentID === selectedDepartment.DepartmentID
+        );
+      }
+    }
+
+    if (positionFilter !== "All Positions") {
+      const selectedPosition = positions.find(
+        (position) => position.PositionName === positionFilter
+      );
+
+      if (selectedPosition) {
+        filteredEmployees = filteredEmployees.filter(
+          (employee) => employee.PositionID === selectedPosition.PositionID
+        );
+      }
+    }
+
+    return departments
+      .filter((department) => {
+        if (departmentFilter === "All Departments") {
+          return true;
+        }
+
+        return department.DepartmentName === departmentFilter;
+      })
+      .map((department) => {
+        const total = filteredEmployees.filter(
+          (employee) => employee.DepartmentID === department.DepartmentID
+        ).length;
+
+        return {
+          ...department,
+          total,
+        };
+      });
+  }, [employees, departments, positions, departmentFilter, positionFilter]);
+
   if (!data) {
     return <div className="loading">Loading dashboard...</div>;
   }
 
-  const summary = data.summary || {};
-  const departments = data.departmentChart || [];
-  const activities = data.recentActivities || [];
-
-  const maxValue = 5;
+  const maxScale = 5;
 
   return (
     <div className="dashboard-page">
@@ -40,18 +92,23 @@ function Dashboard() {
           <a className="active" href="#">
             <span>⌂</span> Dashboard
           </a>
+
           <a href="#">
             <span>▦</span> Department <b>›</b>
           </a>
+
           <a href="#">
             <span>♙</span> Employee
           </a>
+
           <a href="#">
             <span>◷</span> Attendance
           </a>
+
           <a href="#">
             <span>$</span> Salary
           </a>
+
           <a href="#">
             <span>▤</span> Report <em>14</em>
           </a>
@@ -61,9 +118,11 @@ function Dashboard() {
           <a href="#">
             <span>?</span> Guide <b>›</b>
           </a>
+
           <a href="#">
             <span>✉</span> Messenger <i>New!</i>
           </a>
+
           <a href="#">
             <span>⚙</span> Settings
           </a>
@@ -74,6 +133,7 @@ function Dashboard() {
         <header className="topbar">
           <div className="title-box">
             <span className="hamburger">☰</span>
+
             <div>
               <h1>Dashboard</h1>
               <p>HR and Payroll Integration Overview</p>
@@ -86,15 +146,24 @@ function Dashboard() {
               <span>⌕</span>
             </div>
 
-            <div className="notify">🔔<b className="blue-dot">23</b></div>
-            <div className="notify">↻<b className="green-dot">68</b></div>
-            <div className="notify">◔<b className="gray-dot">14</b></div>
+            <div className="notify">
+              🔔<b className="blue-dot">23</b>
+            </div>
+
+            <div className="notify">
+              ↻<b className="green-dot">68</b>
+            </div>
+
+            <div className="notify">
+              ◔<b className="gray-dot">14</b>
+            </div>
 
             <div className="profile">
               <div>
                 <strong>Designluch</strong>
                 <small>Super Admin</small>
               </div>
+
               <div className="avatar">🙂</div>
             </div>
           </div>
@@ -122,6 +191,7 @@ function Dashboard() {
           <div className="income-card">
             <div className="income-blue">
               <div className="circle">+5%</div>
+
               <div>
                 <p>Total Dividend</p>
                 <h2>${Number(summary.totalDividend || 0).toLocaleString()}</h2>
@@ -133,6 +203,7 @@ function Dashboard() {
                 <p>Total Payroll</p>
                 <h2>${Number(summary.totalRevenue || 0).toLocaleString()}</h2>
               </div>
+
               <div className="circle">+5%</div>
             </div>
           </div>
@@ -140,41 +211,84 @@ function Dashboard() {
 
         <section className="middle">
           <div className="panel chart-panel">
-            <div className="panel-header">
-              <h3>Employees by Department</h3>
-              <button>This Month ▼</button>
-            </div>
-
-            <div className="chart-box">
-              <div className="y-axis">
-                <span>5</span>
-                <span>4</span>
-                <span>3</span>
-                <span>2</span>
-                <span>1</span>
+            <div className="chart-header">
+              <div>
+                <h3>Employees by Department</h3>
+                <p>Based on HUMAN_2025 employee, department, and position data</p>
               </div>
 
-              <div className="bar-chart">
-                {departments.map((item, index) => {
-                  const value = item.total || 0;
-                  const height = Math.max((value / maxValue) * 160, 34);
+              <div className="chart-filters">
+                <select
+                  value={timeFilter}
+                  onChange={(event) => setTimeFilter(event.target.value)}
+                >
+                  <option>This Month</option>
+                  <option>Last Month</option>
+                  <option>This Quarter</option>
+                  <option>2026</option>
+                </select>
+
+                <select
+                  value={departmentFilter}
+                  onChange={(event) => setDepartmentFilter(event.target.value)}
+                >
+                  <option>All Departments</option>
+                  {departments.map((department) => (
+                    <option
+                      key={department.DepartmentID}
+                      value={department.DepartmentName}
+                    >
+                      {department.DepartmentName}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={positionFilter}
+                  onChange={(event) => setPositionFilter(event.target.value)}
+                >
+                  <option>All Positions</option>
+                  {positions.map((position) => (
+                    <option
+                      key={position.PositionID}
+                      value={position.PositionName}
+                    >
+                      {position.PositionName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="department-chart">
+              <div className="chart-grid">
+                {[5, 4, 3, 2, 1].map((line) => (
+                  <div className="grid-line" key={line}>
+                    <span>{line}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="bars-container">
+                {filteredDepartments.map((department) => {
+                  const value = department.total || 0;
+                  const height = Math.max((value / maxScale) * 250, 40);
 
                   return (
-                    <div className="bar-item" key={index}>
-                      <div className="bar-wrapper">
-                        <div
-                          className="bar"
-                          style={{ height: `${height}px` }}
-                        >
-                          <span>{value}</span>
-                        </div>
+                    <div className="bar-item" key={department.DepartmentID}>
+                      <div className="bar" style={{ height: `${height}px` }}>
+                        <span className="bar-value">{value}</span>
                       </div>
 
-                      <p>{item.DepartmentName}</p>
+                      <p>{department.DepartmentName}</p>
                     </div>
                   );
                 })}
               </div>
+            </div>
+
+            <div className="filter-note">
+              Filter: {timeFilter} / {departmentFilter} / {positionFilter}
             </div>
           </div>
 
@@ -196,6 +310,7 @@ function Dashboard() {
           <div className="panel dividend-panel">
             <div className="panel-header">
               <h3>Dividend Summary</h3>
+
               <div className="tabs">
                 <b>Monthly</b>
                 <span>Weekly</span>
@@ -240,6 +355,7 @@ function Dashboard() {
                 <span>Weekly</span>
                 <span>Daily</span>
               </div>
+
               <button>Download CSV</button>
             </div>
 
