@@ -24,7 +24,7 @@ function Dashboard() {
 
   const summary = data.summary || {};
   const departments = data.departmentChart || [];
-  const recentActivities = data.recentActivities || [];
+  const activities = data.recentActivities || [];
 
   const maxValue = Math.max(...departments.map((d) => d.total || 0), 1);
 
@@ -38,127 +38,94 @@ function Dashboard() {
 
         <nav className="menu">
           <a className="active" href="#"><span>⌂</span>Dashboard</a>
-          <a href="#"><span>▦</span>Department <b>›</b></a>
           <a href="#"><span>♙</span>Employee</a>
-          <a href="#"><span>◷</span>Attendance</a>
-          <a href="#"><span>$</span>Salary</a>
-          <a href="#"><span>▤</span>Report <em>14</em></a>
-
-          <p>Others</p>
-
-          <a href="#"><span>?</span>Guide <b>›</b></a>
-          <a href="#"><span>✉</span>Messenger <i>New!</i></a>
-          <a href="#"><span>⚙</span>Settings</a>
+          <a href="#"><span>$</span>Payroll</a>
         </nav>
       </aside>
 
       <main className="main">
         <header className="topbar">
-          <div className="title-box">
-            <span className="hamburger">☰</span>
+          <div>
             <h1>Dashboard</h1>
+            <p>HR and Payroll Integration Overview</p>
           </div>
 
-          <div className="top-right">
-            <div className="search-box">
-              <input placeholder="Search here..." />
-              <span>⌕</span>
+          <div className="profile">
+            <div>
+              <strong>Admin</strong>
+              <small>Super Admin</small>
             </div>
-
-            <div className="notify">🔔<b className="blue-dot">23</b></div>
-            <div className="notify">◷<b className="green-dot">68</b></div>
-            <div className="notify">✉<b className="gray-dot">14</b></div>
-
-            <div className="profile">
-              <div>
-                <strong>Designluch</strong>
-                <small>Super Admin</small>
-              </div>
-              <div className="avatar">🐻</div>
-            </div>
+            <div className="avatar">👤</div>
           </div>
         </header>
 
         <section className="summary">
-          <div className="small-card">
-            <p>Tổng nhân viên</p>
+          <div className="card small-card">
+            <p>Total Employees</p>
             <h2>{summary.totalEmployees || 0}</h2>
             <span>SQL Server</span>
           </div>
 
-          <div className="small-card">
-            <p>Đi làm hôm nay</p>
+          <div className="card small-card">
+            <p>Active Employees</p>
             <h2>{summary.activeEmployees || 0}</h2>
             <span>HUMAN_2025</span>
           </div>
 
-          <div className="small-card">
-            <p>Nghỉ phép</p>
+          <div className="card small-card">
+            <p>Employees on Leave</p>
             <h2>{summary.leaveEmployees || 0}</h2>
             <span>HUMAN_2025</span>
           </div>
 
           <div className="income-card">
             <div className="income-blue">
-              <div className="circle">+5%</div>
-              <div>
-                <p>Cổ tức Q2 2026</p>
-                <h2>${Number(summary.totalDividend || 0).toLocaleString()}</h2>
-              </div>
+              <p>Total Dividend</p>
+              <h2>${Number(summary.totalDividend || 0).toLocaleString()}</h2>
             </div>
 
             <div className="income-green">
-              <div>
-                <p>Tổng doanh thu</p>
-                <h2>${Number(summary.totalRevenue || 0).toLocaleString()}</h2>
-              </div>
-              <div className="circle">+5%</div>
+              <p>Total Payroll</p>
+              <h2>${Number(summary.totalRevenue || 0).toLocaleString()}</h2>
             </div>
           </div>
         </section>
 
         <section className="middle">
-          <div className="panel chart-panel">
+          <div className="card panel">
             <div className="panel-header">
-              <h3>Nhân viên theo phòng ban</h3>
-              <button>This Month⌄</button>
+              <h3>Employees by Department</h3>
+              <button>This Month</button>
             </div>
 
             <div className="chart-area">
-              <div className="y-axis">
-                <span>100</span>
-                <span>80</span>
-                <span>60</span>
-                <span>40</span>
-                <span>20</span>
-              </div>
-
-              <div className="bar-chart">
-                {departments.map((item, index) => (
-                  <div className="bar-item" key={index}>
+              {departments.map((item, index) => (
+                <div className="bar-item" key={index}>
+                  <div className="bar-wrapper">
                     <div
                       className="bar"
                       style={{
-                        height: `${Math.max(
-                          ((item.total || 0) / maxValue) * 175,
-                          25
-                        )}px`,
+                        height: `${Math.max(((item.total || 0) / maxValue) * 190, 28)}px`,
                       }}
-                    ></div>
-                    <span>{item.DepartmentName}</span>
+                    >
+                      <span>{item.total}</span>
+                    </div>
                   </div>
-                ))}
-              </div>
+
+                  <p>{item.DepartmentName}</p>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="panel recent-panel">
-            <h3>Hoạt động gần đây</h3>
+          <div className="card panel activity-panel">
+            <h3>Recent Activities</h3>
 
             <div className="activity-list">
-              {recentActivities.map((item, index) => (
+              {activities.map((item, index) => (
                 <div className="activity-item" key={index}>
-                  {item}
+                  <span></span>
+                  <p>{item}</p>
                 </div>
               ))}
             </div>
@@ -166,92 +133,46 @@ function Dashboard() {
         </section>
 
         <section className="bottom">
-          <div className="panel coupon-panel">
+          <div className="card dividend-panel">
             <div className="panel-header">
-              <h3>Dữ liệu cổ tức</h3>
-              <div className="tabs">
-                <b>Monthly</b>
-                <span>Weekly</span>
-                <span>Daily</span>
-              </div>
+              <h3>Dividend Summary</h3>
+              <button>View Detail</button>
             </div>
 
-            <div className="coupon-row">
-              <div>
-                <label>#SQL-HR</label>
-                <h4>Dividend data loaded from HUMAN_2025</h4>
-                <p>✓ Total dividend: ${Number(summary.totalDividend || 0).toLocaleString()}</p>
+            <div className="dividend-content">
+              <div className="dividend-main">
+                <label>HUMAN_2025</label>
+                <h2>${Number(summary.totalDividend || 0).toLocaleString()}</h2>
+                <p>Total dividend amount loaded from SQL Server database.</p>
               </div>
 
-              <svg viewBox="0 0 120 60" className="spark red">
-                <path d="M5 30 C15 55, 25 5, 35 35 S55 50, 60 20 S75 5, 80 35 S100 30, 110 55" />
-              </svg>
-
-              <div className="percent">
-                <b>-2%</b>
-                <small>User Insight</small>
-              </div>
-            </div>
-
-            <div className="coupon-row">
-              <div>
-                <label>#MYSQL-PAYROLL</label>
-                <h4>Salary data synchronized from payroll_2026</h4>
-                <p>✓ Revenue: ${Number(summary.totalRevenue || 0).toLocaleString()}</p>
-              </div>
-
-              <svg viewBox="0 0 120 60" className="spark green-line">
-                <path d="M5 45 C15 15, 25 35, 35 20 S50 5, 55 30 S70 60, 80 25 S100 40, 110 18" />
-              </svg>
-
-              <div className="percent">
-                <b>+9%</b>
-                <small>Payroll Insight</small>
+              <div className="donut">
+                <div>
+                  <strong>+5%</strong>
+                  <small>Q2 2026</small>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="panel trend-panel">
-            <div className="trend-header">
-              <div className="tabs">
-                <b>Monthly</b>
-                <span>Weekly</span>
-                <span>Daily</span>
-              </div>
+          <div className="card payroll-panel">
+            <div className="panel-header">
+              <h3>Payroll Trend</h3>
               <button>Download CSV</button>
             </div>
 
             <div className="trend-title">
-              <h2>{Number(summary.totalRevenue || 0).toLocaleString()}</h2>
-              <span className="triangle"></span>
-              <p>+9% from last month</p>
+              <h2>${Number(summary.totalRevenue || 0).toLocaleString()}</h2>
+              <p>Integrated from payroll_2026 MySQL database</p>
             </div>
 
             <div className="area-chart">
-              <svg viewBox="0 0 600 230" preserveAspectRatio="none">
+              <svg viewBox="0 0 600 220" preserveAspectRatio="none">
                 <path
-                  d="M0 90 L30 160 L60 180 L90 165 L120 200 L150 110 L180 160 L210 80 L240 175 L270 120 L300 200 L330 70 L360 75 L390 150 L420 95 L450 120 L480 85 L510 110 L540 70 L570 125 L600 80 L600 230 L0 230 Z"
+                  d="M0 110 L40 160 L80 140 L120 180 L160 90 L200 120 L240 80 L280 150 L320 70 L360 90 L400 130 L440 75 L480 105 L520 60 L560 95 L600 70 L600 220 L0 220 Z"
                   fill="#0d86ff"
                 />
-                <path
-                  d="M330 0 L330 230"
-                  stroke="#0b63ce"
-                  strokeDasharray="5 5"
-                  strokeWidth="2"
-                  opacity=".6"
-                />
-                <circle cx="360" cy="75" r="8" fill="#0d86ff" stroke="white" strokeWidth="4" />
               </svg>
-            </div>
-
-            <div className="months">
-              <span>August</span>
-              <span>September</span>
-              <span>October</span>
-              <span>November</span>
-              <span>December</span>
-              <b>January</b>
-              <span>February</span>
             </div>
           </div>
         </section>
