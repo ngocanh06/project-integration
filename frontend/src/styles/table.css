@@ -1,0 +1,110 @@
+/* Premium Global Table Styling */
+.page-container {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+}
+
+.header-actions h2 {
+    margin: 0;
+    color: #1e293b;
+    font-weight: 800;
+    font-size: 28px;
+    letter-spacing: -0.025em;
+}
+
+.btn-add {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.btn-add:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.data-table th {
+    text-align: left;
+    padding: 1.25rem 1rem;
+    color: #64748b;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.data-table td {
+    padding: 1.25rem 1rem;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.9375rem;
+}
+
+.data-table tr:hover td {
+    background-color: #f8fafc;
+}
+
+.btn-edit, .btn-delete {
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    margin-right: 0.75rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-edit {
+    color: #4f46e5;
+    background-color: #eef2ff;
+    border-color: #e0e7ff;
+}
+
+.btn-edit:hover {
+    background-color: #e0e7ff;
+    transform: scale(1.05);
+}
+
+.btn-delete {
+    color: #dc2626;
+    background-color: #fef2f2;
+    border-color: #fee2e2;
+}
+
+.btn-delete:hover {
+    background-color: #fee2e2;
+    transform: scale(1.05);
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    padding: 5rem;
+    font-style: italic;
+    color: #94a3b8;
+    font-size: 18px;
+}

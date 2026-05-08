@@ -1,0 +1,25 @@
+.filter-dropdown {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filter-dropdown label {
+    font-weight: 500;
+    color: #fff;
+}
+
+.filter-dropdown select {
+    padding: 8px 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    outline: none;
+    cursor: pointer;
+}
+
+.filter-dropdown select option {
+    background: #2a2a35;
+    color: white;
+}
