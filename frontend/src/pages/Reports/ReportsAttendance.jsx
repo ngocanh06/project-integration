@@ -1,10 +1,12 @@
 // frontend/src/pages/Reports/ReportsAttendance.jsx
 import React, { useState, useEffect } from 'react';
-import { FaCalendarAlt, FaChartLine } from 'react-icons/fa';
+import { FaCalendarAlt, FaChartLine, FaBirthdayCake } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import { getLeaveAbsenceRate, getMonthlyAttendanceSummary } from '../../services/reportService';
 import '../../styles/reports.css';
 
 const ReportsAttendance = () => {
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [selectedYear, setSelectedYear] = useState(2024);
     const [leaveRate, setLeaveRate] = useState(null);
@@ -40,13 +42,21 @@ const ReportsAttendance = () => {
         <div className="reports-page">
             <div className="reports-header">
                 <h1>Attendance Reports</h1>
-                <div className="filter-group">
-                    <label>Year:</label>
-                    <select value={selectedYear} onChange={(e) => setSelectedYear(Number(e.target.value))}>
-                        {years.map(year => (
-                            <option key={year} value={year}>{year}</option>
-                        ))}
-                    </select>
+                <div className="header-actions">
+                    <button 
+                        className="btn-anniversary-alert" 
+                        onClick={() => navigate('/alerts/anniversary')}
+                    >
+                        <FaBirthdayCake /> Work Anniversary Alerts
+                    </button>
+                    <div className="filter-group">
+                        <label>Year:</label>
+                        <select value={selectedYear} onChange={(e) => setSelectedYear(Number(e.target.value))}>
+                            {years.map(year => (
+                                <option key={year} value={year}>{year}</option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
             </div>
 

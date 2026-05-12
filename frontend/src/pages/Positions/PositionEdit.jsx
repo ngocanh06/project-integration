@@ -66,7 +66,7 @@ const PositionEdit = () => {
         <div className="position-page">
             <div className="position-container">
                 <div className="form-header-position">
-                    <h1>Chỉnh sửa chức vụ</h1>
+                    <h1>Edit Position</h1>
                     <Link to="/positions" className="btn-back">
                         <FaTimes /> Hủy
                     </Link>
@@ -76,7 +76,7 @@ const PositionEdit = () => {
                     {error && <div className="error-message">{error}</div>}
 
                     <div className="form-group-position">
-                        <label>Tên chức vụ *</label>
+                        <label>Position Name *</label>
                         <input
                             type="text"
                             name="PositionName"

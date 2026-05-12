@@ -162,7 +162,7 @@ const Header = () => {
                         </div>
                         <div className="user-info">
                             <span className="user-name">{user?.full_name || user?.username || 'ngocanh136'}</span>
-                            <span className="user-role">{getRoleName(user?.role_id)}</span>
+                            <span className="user-role">{getRoleName(user?.role || user?.role_id)}</span>
                         </div>
                         <FaChevronDown size={12} className="user-arrow" />
                     </button>

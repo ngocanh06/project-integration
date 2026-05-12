@@ -133,9 +133,9 @@ const DashboardHome = () => {
                 </div>
             </div>
 
-            {/* 2 cột - Nhân viên theo phòng ban và Lương theo phòng ban */}
+            {/* Nhân viên theo phòng ban và Lương theo phòng ban */}
             <div className="two-columns">
-                {/* Left: Nhân viên theo phòng ban */}
+                {/* Nhân viên theo phòng ban */}
                 <div className="card">
                     <h3 className="card-title">
                         <FontAwesomeIcon icon={faBuilding} /> Nhân viên theo phòng ban
@@ -154,7 +154,7 @@ const DashboardHome = () => {
                     })}
                 </div>
 
-                {/* Right: Lương theo phòng ban (Salary by Department) */}
+                {/* Lương theo phòng ban (Salary by Department) */}
                 <div className="card">
                     <h3 className="card-title">
                         <FontAwesomeIcon icon={faMoneyBillWave} /> Lương theo phòng ban
@@ -222,11 +222,7 @@ const DashboardHome = () => {
                             ))}
                         </div>
                     </div>
-                    <div className="download-row">
-                        <button className="download-btn">
-                            <FontAwesomeIcon icon={faDownload} /> Tải CSV
-                        </button>
-                    </div>
+                    
                 </div>
             </div>
         </>

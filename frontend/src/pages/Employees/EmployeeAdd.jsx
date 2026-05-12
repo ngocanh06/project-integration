@@ -60,7 +60,7 @@ const EmployeeAdd = () => {
             await addEmployee(formData);
             navigate('/employees');
         } catch (error) {
-            setError(error.response?.data?.error || 'Failed to add employee');
+            setError(error.response?.data?.msg || error.response?.data?.error || 'Failed to add employee');
         } finally {
             setLoading(false);
         }

@@ -1,5 +1,6 @@
 # backend/routes/employee_routes.py
 from flask import Blueprint, jsonify, request
+from auth.jwt_handler import permission_required
 from config import get_sqlserver_connection, get_mysql_connection
 from datetime import datetime
 
@@ -9,7 +10,8 @@ employee_bp = Blueprint('employees', __name__)
 # GET: Lấy danh sách nhân viên (kèm tên phòng ban, chức vụ)
 # ======================================================
 @employee_bp.route("/employees", methods=["GET"])
-def get_employees():
+@permission_required('read', 'employees')
+def get_employees(current_user):
     try:
         sql = get_sqlserver_connection()
         cur = sql.cursor()
@@ -110,7 +112,8 @@ def get_employee_by_id(emp_id):
 # POST: Thêm nhân viên mới (đồng bộ cả 2 DB)
 # ======================================================
 @employee_bp.route("/employees", methods=["POST"])
-def add_employee():
+@permission_required('create', 'employees')
+def add_employee(current_user):
     data = request.get_json()
     
     full_name = data.get("FullName")

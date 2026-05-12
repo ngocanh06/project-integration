@@ -130,7 +130,7 @@ const PositionList = () => {
             <div className="position-container">
                 {/* Page Header */}
                 <div className="page-header-position">
-                    <h1>Quản lý chức vụ</h1>
+                    <h1>Position Management</h1>
                     <Link to="/positions/add" className="btn-add">
                         <FaPlus /> Add Position
                     </Link>

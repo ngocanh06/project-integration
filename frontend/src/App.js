@@ -31,8 +31,15 @@ import PositionDelete from './pages/Positions/PositionDelete';
 import DividendList from './pages/Dividends/DividendList';
 import DividendPerEmployee from './pages/Dividends/DividendPerEmployee';
 import Alerts from './pages/Alerts/Alerts';
+import UserList from './pages/Admin/UserList';
+import UserAdd from './pages/Admin/UserAdd';
+import UserEdit from './pages/Admin/UserEdit';
+import RoleList from './pages/Admin/RoleList';
+import PermissionList from './pages/Admin/PermissionList';
+import AuditLogs from './pages/Audit/AuditLogs';
 import PrivateRoute from './components/PrivateRoute';
 import './styles/auth.css';
+import './styles/admin.css';
 import './styles/dashboard.css';
 import './styles/employee.css';
 import './styles/department.css';
@@ -84,6 +91,14 @@ function App() {
                         <Route path="/reports/dividends" element={<ReportsDividends />} />
 
                         <Route path="/alerts" element={<Alerts />} />
+
+                        {/* Admin routes */}
+                        <Route path="/admin/users" element={<UserList />} />
+                        <Route path="/admin/users/add" element={<UserAdd />} />
+                        <Route path="/admin/users/edit/:id" element={<UserEdit />} />
+                        <Route path="/admin/roles" element={<RoleList />} />
+                        <Route path="/admin/permissions" element={<PermissionList />} />
+                        <Route path="/admin/audit-logs" element={<AuditLogs />} />
                         
                         <Route path="/dividends" element={<DividendList />} />
                         <Route path="/dividends/per-employee" element={<DividendPerEmployee />} />

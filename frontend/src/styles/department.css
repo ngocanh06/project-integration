@@ -339,3 +339,125 @@
         padding: 8px 12px;
     }
 }
+
+.form-header-department {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.form-header-department h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin: 0;
+}
+
+.btn-back {
+    background: none;
+    border: 1px solid #e2e8f0;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #475569;
+    transition: all 0.2s;
+}
+
+.btn-back:hover {
+    background: #f1f5f9;
+}
+
+/* Department Form */
+.department-form {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+}
+
+.form-group-department {
+    margin-bottom: 20px;
+}
+
+.form-group-department label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+.form-group-department input {
+    width: 100%;
+    max-width: 400px;
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.form-group-department input:focus {
+    outline: none;
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1);
+}
+
+/* Form Actions */
+.form-actions-department {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.btn-submit {
+    background: #1a73e8;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.btn-submit:hover {
+    background: #1557b0;
+}
+
+.btn-cancel-department {
+    background: white;
+    border: 1px solid #e2e8f0;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #475569;
+    font-size: 13px;
+}
+
+.btn-cancel-department:hover {
+    background: #f1f5f9;
+}
+
+.error-message {
+    background: #fee2e2;
+    color: #ef4444;
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 13px;
+}

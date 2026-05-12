@@ -28,7 +28,16 @@ const Login = () => {
                     sessionStorage.setItem('token', response.token);
                 }
                 localStorage.setItem('user', JSON.stringify(response.user));
-                navigate('/dashboard');
+                
+                // Redirect dựa trên role
+                const roleId = response.user?.role;
+                if (roleId === 1) {
+                    // Admin -> Trang quản lý tài khoản
+                    navigate('/admin/users');
+                } else {
+                    // Các role khác -> Dashboard
+                    navigate('/dashboard');
+                }
             } else {
                 setError(response.msg || 'Login failed');
             }

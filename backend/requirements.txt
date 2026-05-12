@@ -1,5 +1,13 @@
+<<<<<<< HEAD
 Flask==2.3.3
 flask-cors==4.0.0
 flask-jwt-extended==4.5.2
 bcrypt==4.0.1
 python-dotenv==1.0.0
+=======
+flask
+flask-cors
+python-dotenv
+pyodbc
+mysql-connector-python
+>>>>>>> 034610cf5d2b1576e7b47c3cf96790c4bc35c1a4

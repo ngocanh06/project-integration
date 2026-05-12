@@ -1,7 +1,10 @@
 // frontend/src/pages/Reports/ReportsPayroll.jsx
 import React, { useState, useEffect } from 'react';
 import { FaMoneyBillWave, FaChartLine, FaBuilding } from 'react-icons/fa';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { 
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
+    ResponsiveContainer, AreaChart, Area, LineChart, Line, Defs, LinearGradient, Stop 
+} from 'recharts';
 import { getTotalSalaryCost, getSalaryByDepartment, getSalaryTrend } from '../../services/reportService';
 import '../../styles/reports.css';
 
@@ -28,7 +31,24 @@ const ReportsPayroll = () => {
             ]);
             setTotalCost(cost);
             setSalaryByDept(dept || []);
-            setSalaryTrend(trend || []);
+            // Tạo danh sách đủ 12 tháng với giá trị mặc định là 0
+            const monthNames = [
+                "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
+                "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
+            ];
+            
+            const fullYearData = monthNames.map((name, index) => {
+                const monthNum = index + 1;
+                const existingData = trend.find(t => t.month === monthNum);
+                return {
+                    month: monthNum,
+                    monthName: name,
+                    total_net: existingData ? existingData.total_net : 0,
+                    employee_count: existingData ? existingData.employee_count : 0
+                };
+            });
+            
+            setSalaryTrend(fullYearData);
         } catch (error) {
             console.error('Failed to fetch payroll reports:', error);
         } finally {
@@ -179,15 +199,21 @@ const ReportsPayroll = () => {
                 )}
             </div>
 
-            {/* Salary Trend - Line Chart ĐƠN GIẢN VÀ ĐẸP */}
+            {/* Salary Trend - Area Chart Cao Cấp */}
             <div className="reports-section chart-section">
                 <h2><FaChartLine /> Salary Trend {selectedYear}</h2>
                 {salaryTrend && salaryTrend.length > 0 ? (
                     <ResponsiveContainer width="100%" height={400}>
-                        <LineChart data={salaryTrend} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <AreaChart data={salaryTrend} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                            <defs>
+                                <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.3}/>
+                                    <stop offset="95%" stopColor="#4f46e5" stopOpacity={0}/>
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                             <XAxis 
-                                dataKey="month" 
+                                dataKey="monthName" 
                                 tick={{ fill: '#64748b', fontSize: 12, fontWeight: 500 }}
                                 axisLine={{ stroke: '#cbd5e1' }}
                                 tickLine={{ stroke: '#cbd5e1' }}
@@ -205,16 +231,19 @@ const ReportsPayroll = () => {
                                 height={36}
                                 iconType="circle"
                             />
-                            <Line 
+                            <Area 
                                 type="monotone" 
                                 dataKey="total_net" 
                                 name="Total Salary" 
                                 stroke="#4f46e5" 
                                 strokeWidth={3} 
-                                dot={{ r: 5, fill: '#4f46e5', strokeWidth: 2, stroke: '#fff' }}
-                                activeDot={{ r: 7 }}
+                                fillOpacity={1} 
+                                fill="url(#colorTotal)"
+                                dot={{ r: 6, fill: '#4f46e5', strokeWidth: 2, stroke: '#fff' }}
+                                activeDot={{ r: 8, strokeWidth: 0 }}
+                                animationDuration={1500}
                             />
-                        </LineChart>
+                        </AreaChart>
                     </ResponsiveContainer>
                 ) : (
                     <div className="no-data">No trend data available for {selectedYear}</div>

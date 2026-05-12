@@ -12,17 +12,24 @@ alert_bp = Blueprint('alerts', __name__)
 def get_anniversary_alerts():
     try:
         today = datetime.now().date()
-        month = today.month
-        day = today.day
         
         sql = get_sqlserver_connection()
         cursor = sql.cursor()
         
+        # Lấy tất cả nhân viên để theo dõi kỷ niệm
         cursor.execute("""
-            SELECT EmployeeID, FullName, HireDate
-            FROM Employees
-            WHERE MONTH(HireDate) = ? AND DAY(HireDate) = ?
-        """, (month, day))
+            SELECT 
+                e.EmployeeID, 
+                e.FullName, 
+                e.HireDate,
+                d.DepartmentName,
+                p.PositionName,
+                e.Email
+            FROM Employees e
+            LEFT JOIN Departments d ON e.DepartmentID = d.DepartmentID
+            LEFT JOIN Positions p ON e.PositionID = p.PositionID
+            ORDER BY e.EmployeeID
+        """)
         
         rows = cursor.fetchall()
         cursor.close()
@@ -31,7 +38,22 @@ def get_anniversary_alerts():
         alerts = []
         for row in rows:
             hire_date = row[2]
+            if not hire_date:
+                continue
+                
+            # Tính số năm đã làm
             years = today.year - hire_date.year
+            
+            # Tính ngày kỷ niệm tiếp theo
+            next_anniversary = datetime(today.year, hire_date.month, hire_date.day).date()
+            if next_anniversary < today:
+                next_anniversary = datetime(today.year + 1, hire_date.month, hire_date.day).date()
+                years_at_next = years + 1
+            else:
+                years_at_next = years
+            
+            days_remaining = (next_anniversary - today).days
+            
             alerts.append({
                 "id": row[0],
                 "type": "anniversary",
@@ -39,10 +61,18 @@ def get_anniversary_alerts():
                 "message": f"{row[1]} đã làm việc được {years} năm",
                 "employee_id": row[0],
                 "employee_name": row[1],
+                "department": row[3] or "N/A",
+                "position": row[4] or "N/A",
+                "email": row[5] or "N/A",
                 "years": years,
+                "years_next": years_at_next,
                 "date": str(hire_date),
+                "next_date": str(next_anniversary),
+                "days_remaining": days_remaining,
                 "created_at": str(today)
             })
+        
+        return jsonify(alerts), 200
         
         return jsonify(alerts), 200
         

@@ -5,7 +5,7 @@ from config import get_mysql_connection
 attendance_bp = Blueprint('attendance', __name__)
 
 # ======================================================
-# GET: Lấy danh sách chấm công (có filter)
+# GET: Lấy danh sách chấm công
 # ======================================================
 @attendance_bp.route("/attendance", methods=["GET"])
 def get_attendance():
