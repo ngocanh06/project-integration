@@ -1,6 +1,9 @@
 # backend/routes/attendance_routes.py
 from flask import Blueprint, jsonify, request
 from config import get_mysql_connection
+from validation.attendance_validation import validate_attendance_data, validate_attendance_update_data
+from auth.jwt_handler import permission_required, token_required
+from routes.audit_routes import log_action
 
 attendance_bp = Blueprint('attendance', __name__)
 
@@ -260,8 +263,10 @@ def add_attendance():
     leave_days = data.get("LeaveDays", 0)
     attendance_month = data.get("AttendanceMonth")
     
-    if not employee_id or not work_days or not attendance_month:
-        return jsonify({"error": "EmployeeID, WorkDays and AttendanceMonth are required"}), 400
+    # Validate dữ liệu
+    is_valid, error_msg = validate_attendance_data(data)
+    if not is_valid:
+        return jsonify({"error": error_msg}), 400
     
     try:
         payroll_db = get_mysql_connection()
@@ -289,6 +294,17 @@ def add_attendance():
         
         cursor.close()
         payroll_db.close()
+
+        log_action(
+            user_id=current_user['user_id'],
+            username=current_user['username'],
+            action="CREATE",
+            resource="ATTENDANCE",
+            resource_id=new_id,
+            new_value=data,
+            status="success",
+            ip_address=request.remote_addr
+        )
         
         return jsonify({
             "message": "Attendance record added successfully",
@@ -310,8 +326,10 @@ def update_attendance(att_id):
     absent_days = data.get("AbsentDays")
     leave_days = data.get("LeaveDays")
     
-    if not work_days:
-        return jsonify({"error": "WorkDays is required"}), 400
+    # Validate dữ liệu cho update
+    is_valid, error_msg = validate_attendance_update_data(data)
+    if not is_valid:
+        return jsonify({"error": error_msg}), 400
     
     try:
         payroll_db = get_mysql_connection()
@@ -332,6 +350,17 @@ def update_attendance(att_id):
         payroll_db.commit()
         cursor.close()
         payroll_db.close()
+
+        log_action(
+            user_id=current_user['user_id'],
+            username=current_user['username'],
+            action="UPDATE",
+            resource="ATTENDANCE",
+            resource_id=att_id,
+            new_value=data,
+            status="success",
+            ip_address=request.remote_addr
+        )
         
         return jsonify({"message": "Attendance record updated successfully"}), 200
         
@@ -359,6 +388,16 @@ def delete_attendance(att_id):
         payroll_db.commit()
         cursor.close()
         payroll_db.close()
+
+        log_action(
+            user_id=current_user['user_id'],
+            username=current_user['username'],
+            action="DELETE",
+            resource="ATTENDANCE",
+            resource_id=att_id,
+            status="success",
+            ip_address=request.remote_addr
+        )
         
         return jsonify({"message": "Attendance record deleted successfully"}), 200
         

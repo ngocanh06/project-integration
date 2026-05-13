@@ -4,9 +4,13 @@ import api from '../utils/api';
 export const getAnniversaryAlerts = async () => {
     try {
         const response = await api.get('/alerts/anniversary');
-        return response.data;
+        console.log('Anniversary alerts response:', response.data);
+        // Backend trả về array trực tiếp hoặc { status, data }
+        const data = Array.isArray(response.data) ? response.data : response.data?.data || [];
+        return data;
     } catch (error) {
         console.error('Error fetching anniversary alerts:', error);
+        console.error('Response:', error.response?.data);
         return [];
     }
 };

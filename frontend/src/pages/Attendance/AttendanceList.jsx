@@ -42,8 +42,11 @@ const AttendanceList = () => {
                 getAttendance(),
                 getEmployees()
             ]);
-            setAttendance(attData);
-            setEmployees(empData);
+            setAttendance(Array.isArray(attData) ? attData : []);
+            setEmployees(Array.isArray(empData) ? empData : []);
+            if (!Array.isArray(attData) || !Array.isArray(empData)) {
+                console.error('Data received is not an array:', { attData, empData });
+            }
         } catch (error) {
             console.error('Failed to fetch data:', error);
         } finally {
@@ -82,7 +85,7 @@ const AttendanceList = () => {
         setLoading(true);
         try {
             const data = await getAttendance(selectedMonth, selectedEmployee);
-            setAttendance(data);
+            setAttendance(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Failed to fetch filtered data:', error);
         } finally {

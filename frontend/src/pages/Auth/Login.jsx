@@ -9,12 +9,32 @@ const Login = () => {
     const [rememberMe, setRememberMe] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+
+    const validateField = (name, value) => {
+        let err = '';
+        if (name === 'loginInput' && !value.trim()) err = 'Vui lòng nhập tên đăng nhập hoặc email';
+        if (name === 'password' && !value) err = 'Vui lòng nhập mật khẩu';
+        
+        setFieldErrors(prev => ({ ...prev, [name]: err }));
+        return err === '';
+    };
+
+    const validate = () => {
+        let isValid = true;
+        if (!validateField('loginInput', loginInput)) isValid = false;
+        if (!validateField('password', password)) isValid = false;
+        return isValid;
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        
+        if (!validate()) return;
+        
         setLoading(true);
 
         try {
@@ -68,10 +88,15 @@ const Login = () => {
                         <input
                             type="text"
                             value={loginInput}
-                            onChange={(e) => setLoginInput(e.target.value)}
+                            onChange={(e) => {
+                                setLoginInput(e.target.value);
+                                validateField('loginInput', e.target.value);
+                            }}
                             placeholder="Enter username or email"
+                            className={fieldErrors.loginInput ? 'input-error' : ''}
                             required
                         />
+                        {fieldErrors.loginInput && <span className="field-error">{fieldErrors.loginInput}</span>}
                     </div>
 
                     <div className="form-group">
@@ -80,10 +105,15 @@ const Login = () => {
                             <input
                                 type={showPassword ? "text" : "password"}
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={(e) => {
+                                    setPassword(e.target.value);
+                                    validateField('password', e.target.value);
+                                }}
                                 placeholder="Password"
+                                className={fieldErrors.password ? 'input-error' : ''}
                                 required
                             />
+                            {fieldErrors.password && <span className="field-error">{fieldErrors.password}</span>}
                             <button
                                 type="button"
                                 className="toggle-password-btn"

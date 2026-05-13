@@ -14,6 +14,7 @@ from routes.dividend_routes import dividend_bp
 from routes.user_routes import user_bp
 from routes.role_routes import role_bp
 from routes.audit_routes import audit_bp
+from routes.otp_routes import otp_bp
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
@@ -30,6 +31,7 @@ app.register_blueprint(alert_bp, url_prefix='/api')
 app.register_blueprint(dividend_bp, url_prefix='/api')
 app.register_blueprint(user_bp, url_prefix='/api')
 app.register_blueprint(role_bp, url_prefix='/api')
+app.register_blueprint(otp_bp, url_prefix='/api')
 app.register_blueprint(audit_bp, url_prefix='/api')
 
 # print("=== ALL ROUTES ===")

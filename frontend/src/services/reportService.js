@@ -128,13 +128,3 @@ export const getDividendsPerEmployee = async (year = null) => {
         throw error;
     }
 };
-
-export const getAttendanceStats = async () => {
-    try {
-        const response = await api.get('/attendance/stats');
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching attendance stats:', error);
-        return { total_leave: 0, total_absent: 0 };
-    }
-};

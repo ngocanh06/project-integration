@@ -14,6 +14,7 @@ const DepartmentEdit = () => {
         DepartmentName: ''
     });
     const [error, setError] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({});
 
     useEffect(() => {
         fetchDepartment();
@@ -34,18 +35,29 @@ const DepartmentEdit = () => {
         }
     };
 
+    const validateField = (name, value) => {
+        let error = '';
+        if (name === 'DepartmentName') {
+            if (!value.trim()) error = 'Tên phòng ban là bắt buộc';
+            else if (value.trim().length < 3) error = 'Tên phòng ban phải có ít nhất 3 ký tự';
+        }
+        
+        setFieldErrors(prev => ({ ...prev, [name]: error }));
+        return error === '';
+    };
+
     const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+        validateField(name, value);
         setError('');
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.DepartmentName.trim()) {
-            setError('Department name is required');
+        
+        if (!validateField('DepartmentName', formData.DepartmentName)) {
+            setError('Vui lòng nhập tên phòng ban');
             return;
         }
         
@@ -55,7 +67,7 @@ const DepartmentEdit = () => {
             navigate('/departments');
         } catch (error) {
             console.error('Update failed:', error);
-            setError(error.response?.data?.msg || 'Failed to update department');
+            setError(error.response?.data?.error || 'Failed to update department');
         } finally {
             setLoading(false);
         }
@@ -90,8 +102,10 @@ const DepartmentEdit = () => {
                             value={formData.DepartmentName}
                             onChange={handleChange}
                             placeholder="Enter department name"
+                            className={fieldErrors.DepartmentName ? 'input-error' : ''}
                             required
                         />
+                        {fieldErrors.DepartmentName && <span className="field-error">{fieldErrors.DepartmentName}</span>}
                     </div>
 
                     <div className="form-actions-department">

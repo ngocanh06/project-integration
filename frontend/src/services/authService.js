@@ -33,7 +33,7 @@ export const register = async (userData) => {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                full_name: userData.full_name,
+                full_name: userData.fullName || userData.full_name,
                 username: userData.username,
                 email: userData.email,
                 password: userData.password

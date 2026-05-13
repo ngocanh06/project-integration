@@ -2,7 +2,9 @@
 from flask import Blueprint, jsonify, request
 from auth.jwt_handler import permission_required
 from config import get_sqlserver_connection, get_mysql_connection
+from routes.audit_routes import log_action
 from datetime import datetime
+from validation.employee_validation import validate_employee_data
 
 employee_bp = Blueprint('employees', __name__)
 
@@ -126,8 +128,12 @@ def add_employee(current_user):
     pos_id = data.get("PositionID")
     status = data.get("Status") or "Đang làm việc"
     
-    if not full_name or not email:
-        return jsonify({"error": "FullName and Email are required"}), 400
+    # Validate dữ liệu
+    print(f"DEBUG: Validating data: {data}")
+    is_valid, error_msg = validate_employee_data(data)
+    print(f"DEBUG: Validation result: {is_valid}, {error_msg}")
+    if not is_valid:
+        return jsonify({"error": error_msg}), 400
     
     sql = get_sqlserver_connection()
     cur = sql.cursor()
@@ -169,6 +175,18 @@ def add_employee(current_user):
         cur.close()
         sql.close()
         my.close()
+
+        log_action(
+            user_id=current_user['user_id'],
+            username=current_user['username'],
+            action="CREATE",
+            resource="EMPLOYEE",
+            resource_id=new_id,
+            new_value=data,
+            status="success",
+            ip_address=request.remote_addr
+        )
+
         
         return jsonify({
             "message": "Employee added successfully",
@@ -200,6 +218,11 @@ def update_employee(emp_id):
     dept_id = data.get("DepartmentID")
     pos_id = data.get("PositionID")
     status = data.get("Status")
+    
+    # Validate dữ liệu
+    is_valid, error_msg = validate_employee_data(data, is_update=True)
+    if not is_valid:
+        return jsonify({"error": error_msg}), 400
     
     sql = get_sqlserver_connection()
     cur = sql.cursor()
@@ -240,6 +263,17 @@ def update_employee(emp_id):
         cur.close()
         sql.close()
         my.close()
+
+        log_action(
+            user_id=current_user['user_id'],
+            username=current_user['username'],
+            action="UPDATE",
+            resource="EMPLOYEE",
+            resource_id=emp_id,
+            new_value=data,
+            status="success",
+            ip_address=request.remote_addr
+        )
         
         return jsonify({"message": "Employee updated successfully"}), 200
         
@@ -307,6 +341,16 @@ def delete_employee(emp_id):
         cur.close()
         sql.close()
         my.close()
+
+        log_action(
+            user_id=current_user['user_id'],
+            username=current_user['username'],
+            action="DELETE",
+            resource="EMPLOYEE",
+            resource_id=emp_id,
+            status="success",
+            ip_address=request.remote_addr
+        )
         
         return jsonify({"message": "Employee deleted successfully"}), 200
         

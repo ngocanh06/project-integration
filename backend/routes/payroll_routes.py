@@ -1,6 +1,7 @@
 # backend/routes/payroll_routes.py
 from flask import Blueprint, jsonify, request
 from config import get_mysql_connection
+from validation.payroll_validation import validate_salary_data, validate_salary_update_data
 
 payroll_bp = Blueprint('payroll', __name__)
 
@@ -255,8 +256,10 @@ def add_salary():
     deductions = data.get("Deductions", 0)
     net_salary = base_salary + bonus - deductions if base_salary else 0
     
-    if not employee_id or not salary_month or not base_salary:
-        return jsonify({"error": "EmployeeID, SalaryMonth and BaseSalary are required"}), 400
+    # Validate dữ liệu
+    is_valid, error_msg = validate_salary_data(data)
+    if not is_valid:
+        return jsonify({"error": error_msg}), 400
     
     try:
         payroll_db = get_mysql_connection()
@@ -304,8 +307,10 @@ def update_salary(salary_id):
     deductions = data.get("Deductions", 0)
     net_salary = base_salary + bonus - deductions if base_salary else 0
     
-    if not base_salary:
-        return jsonify({"error": "BaseSalary is required"}), 400
+    # Validate dữ liệu cho update
+    is_valid, error_msg = validate_salary_update_data(data)
+    if not is_valid:
+        return jsonify({"error": error_msg}), 400
     
     try:
         payroll_db = get_mysql_connection()

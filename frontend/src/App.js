@@ -17,6 +17,8 @@ import DepartmentAdd from './pages/Departments/DepartmentAdd';
 import DepartmentEdit from './pages/Departments/DepartmentEdit';
 import DepartmentDelete from './pages/Departments/DepartmentDelete';
 import AttendanceList from './pages/Attendance/AttendanceList';
+import AttendanceAdd from './pages/Attendance/AttendanceAdd';
+import AttendanceEdit from './pages/Attendance/AttendanceEdit';
 import AttendanceAnalytics from './pages/Attendance/AttendanceAnalytics';
 import SalaryList from './pages/Payroll/SalaryList';
 import SalaryHistory from './pages/Payroll/SalaryHistory';
@@ -31,6 +33,7 @@ import PositionDelete from './pages/Positions/PositionDelete';
 import DividendList from './pages/Dividends/DividendList';
 import DividendPerEmployee from './pages/Dividends/DividendPerEmployee';
 import Alerts from './pages/Alerts/Alerts';
+import WorkAnniversary from './pages/Alerts/WorkAnniversary';
 import UserList from './pages/Admin/UserList';
 import UserAdd from './pages/Admin/UserAdd';
 import UserEdit from './pages/Admin/UserEdit';
@@ -78,6 +81,8 @@ function App() {
 
                         {/* Attendance routes */}
                         <Route path="/attendance" element={<AttendanceList />} />
+                        <Route path="/attendance/add" element={<AttendanceAdd />} />
+                        <Route path="/attendance/edit/:id" element={<AttendanceEdit />} />
                         <Route path="/attendance/analytics" element={<AttendanceAnalytics />} />
 
                         {/* Payroll routes */}
@@ -91,6 +96,7 @@ function App() {
                         <Route path="/reports/dividends" element={<ReportsDividends />} />
 
                         <Route path="/alerts" element={<Alerts />} />
+                        <Route path="/alerts/anniversary" element={<WorkAnniversary />} />
 
                         {/* Admin routes */}
                         <Route path="/admin/users" element={<UserList />} />

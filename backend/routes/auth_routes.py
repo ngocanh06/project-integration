@@ -5,6 +5,8 @@ import bcrypt
 import jwt
 import datetime
 from datetime import timedelta
+from validation.auth_validation import validate_login_data, validate_register_data
+from routes.audit_routes import log_action
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -20,8 +22,10 @@ def login():
         print(f"Login input: {login_input}")
         print(f"Password: {password}")
         
-        if not login_input or not password:
-            return jsonify({"status": "error", "msg": "Vui lòng nhập đầy đủ thông tin"}), 400
+        # Validate dữ liệu
+        is_valid, error_msg = validate_login_data(data)
+        if not is_valid:
+            return jsonify({"status": "error", "msg": error_msg}), 400
         
         auth = get_auth_connection()
         cursor = auth.cursor(dictionary=True)
@@ -37,6 +41,15 @@ def login():
         auth.close()
         
         if not user:
+            log_action(
+            user_id=None,
+            username=login_input,
+            action="LOGIN",
+            resource="AUTH",
+            status="failed",
+            error_message="User not found",
+            ip_address=request.remote_addr
+        )
             print("User not found")
             return jsonify({"status": "error", "msg": "Sai tên đăng nhập hoặc mật khẩu"}), 401
         
@@ -53,6 +66,7 @@ def login():
             is_valid = False
             
         if not is_valid:
+            
             return jsonify({"status": "error", "msg": "Sai tên đăng nhập hoặc mật khẩu"}), 401
         
         if not user.get('is_active', 1):
@@ -66,7 +80,16 @@ def login():
             'role': user['role_id'],
             'exp': datetime.datetime.utcnow() + timedelta(hours=8)
         }, SECRET_KEY, algorithm='HS256')
-        
+        # Ghi log đăng nhập thành công
+        log_action(
+        user_id=user['user_id'],
+        username=user['username'],
+        action="LOGIN",
+        resource="AUTH",
+        status="success",
+        ip_address=request.remote_addr,
+        user_agent=request.headers.get('User-Agent')
+        )
         print(f"Login successful for user: {user['username']}")
         
         return jsonify({
@@ -95,10 +118,12 @@ def register():
         username = data.get("username")
         email = data.get("email")
         password = data.get("password")
-        full_name = data.get("full_name")
+        full_name = data.get("full_name") or data.get("fullName")
         
-        if not username or not email or not password:
-            return jsonify({"status": "error", "msg": "Vui lòng nhập đầy đủ thông tin"}), 400
+        # Validate dữ liệu
+        is_valid, error_msg = validate_register_data(data)
+        if not is_valid:
+            return jsonify({"status": "error", "msg": error_msg}), 400
         
         auth = get_auth_connection()
         cursor = auth.cursor(dictionary=True)
@@ -125,6 +150,17 @@ def register():
         auth.commit()
         cursor.close()
         auth.close()
+
+         # Ghi log đăng ký thành công
+        log_action(
+        user_id=None, # Chưa có ID lúc đầu hoặc lấy id vừa insert
+        username=username,
+        action="REGISTER",
+        resource="AUTH",
+        status="success",
+        ip_address=request.remote_addr,
+        user_agent=request.headers.get('User-Agent')
+    )
         
         return jsonify({"status": "success", "msg": "Đăng ký thành công"}), 201
         

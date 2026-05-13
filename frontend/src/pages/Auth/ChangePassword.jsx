@@ -10,21 +10,39 @@ const ChangePassword = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+
+    const validateField = (name, value) => {
+        let err = '';
+        if (name === 'currentPassword' && !value) err = 'Vui lòng nhập mật khẩu hiện tại';
+        if (name === 'newPassword') {
+            if (!value) err = 'Vui lòng nhập mật khẩu mới';
+            else if (value.length < 6) err = 'Mật khẩu mới phải có ít nhất 6 ký tự';
+        }
+        if (name === 'confirmPassword') {
+            if (!value) err = 'Vui lòng xác nhận mật khẩu mới';
+            else if (value !== newPassword) err = 'Mật khẩu xác nhận không khớp';
+        }
+
+        setFieldErrors(prev => ({ ...prev, [name]: err }));
+        return err === '';
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         setSuccess('');
 
-        if (newPassword !== confirmPassword) {
-            setError('New passwords do not match');
-            return;
-        }
+        // Validate all fields
+        let isValid = true;
+        if (!validateField('currentPassword', currentPassword)) isValid = false;
+        if (!validateField('newPassword', newPassword)) isValid = false;
+        if (!validateField('confirmPassword', confirmPassword)) isValid = false;
 
-        if (newPassword.length < 6) {
-            setError('Password must be at least 6 characters');
+        if (!isValid) {
+            setError('Vui lòng kiểm tra lại thông tin');
             return;
         }
 
@@ -65,9 +83,14 @@ const ChangePassword = () => {
                         <input
                             type="password"
                             value={currentPassword}
-                            onChange={(e) => setCurrentPassword(e.target.value)}
+                            onChange={(e) => {
+                                setCurrentPassword(e.target.value);
+                                validateField('currentPassword', e.target.value);
+                            }}
+                            className={fieldErrors.currentPassword ? 'input-error' : ''}
                             required
                         />
+                        {fieldErrors.currentPassword && <span className="field-error">{fieldErrors.currentPassword}</span>}
                     </div>
                     
                     <div className="form-group">
@@ -75,9 +98,14 @@ const ChangePassword = () => {
                         <input
                             type="password"
                             value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
+                            onChange={(e) => {
+                                setNewPassword(e.target.value);
+                                validateField('newPassword', e.target.value);
+                            }}
+                            className={fieldErrors.newPassword ? 'input-error' : ''}
                             required
                         />
+                        {fieldErrors.newPassword && <span className="field-error">{fieldErrors.newPassword}</span>}
                     </div>
                     
                     <div className="form-group">
@@ -85,9 +113,14 @@ const ChangePassword = () => {
                         <input
                             type="password"
                             value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            onChange={(e) => {
+                                setConfirmPassword(e.target.value);
+                                validateField('confirmPassword', e.target.value);
+                            }}
+                            className={fieldErrors.confirmPassword ? 'input-error' : ''}
                             required
                         />
+                        {fieldErrors.confirmPassword && <span className="field-error">{fieldErrors.confirmPassword}</span>}
                     </div>
                     
                     <button type="submit" className="btn-update" disabled={loading}>

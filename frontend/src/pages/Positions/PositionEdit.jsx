@@ -14,6 +14,7 @@ const PositionEdit = () => {
     const [formData, setFormData] = useState({
         PositionName: ''
     });
+    const [fieldErrors, setFieldErrors] = useState({});
 
     useEffect(() => {
         fetchPosition();
@@ -34,15 +35,28 @@ const PositionEdit = () => {
         }
     };
 
+    const validateField = (name, value) => {
+        let error = '';
+        if (name === 'PositionName') {
+            if (!value.trim()) error = 'Tên chức vụ là bắt buộc';
+            else if (value.trim().length < 2) error = 'Tên chức vụ phải có ít nhất 2 ký tự';
+        }
+        
+        setFieldErrors(prev => ({ ...prev, [name]: error }));
+        return error === '';
+    };
+
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+        validateField(name, value);
         setError('');
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        if (!formData.PositionName.trim()) {
+        if (!validateField('PositionName', formData.PositionName)) {
             setError('Vui lòng nhập tên chức vụ');
             return;
         }
@@ -83,8 +97,10 @@ const PositionEdit = () => {
                             value={formData.PositionName}
                             onChange={handleChange}
                             placeholder="Nhập tên chức vụ"
+                            className={fieldErrors.PositionName ? 'input-error' : ''}
                             required
                         />
+                        {fieldErrors.PositionName && <span className="field-error">{fieldErrors.PositionName}</span>}
                     </div>
 
                     <div className="form-actions-position">
